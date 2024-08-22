@@ -1,11 +1,19 @@
-/* eslint-disable no-unused-vars */
-import { E164Number } from "libphonenumber-js/core";
-import Image from "next/image";
-import ReactDatePicker from "react-datepicker";
-import { Control } from "react-hook-form";
-import PhoneInput from "react-phone-number-input";
+"use client"; // Ensures the component is treated as a client component in Next.js 14
 
-import { Checkbox } from "./ui/checkbox";
+import React, { useEffect, useState, useRef } from "react";
+import axios from "axios";
+import ReactDatePicker, {
+  registerLocale,
+  setDefaultLocale,
+} from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import { enUS } from "date-fns/locale/en-US";
+import { es } from "date-fns/locale/es";
+import PhoneInput from "react-phone-number-input";
+import "react-phone-number-input/style.css";
+import { CountryCode, E164Number } from "libphonenumber-js/core";
+import Image from "next/image";
+import { Control } from "react-hook-form"; // Ensure this import is present
 import {
   FormControl,
   FormField,
@@ -13,9 +21,14 @@ import {
   FormLabel,
   FormMessage,
 } from "./ui/form";
+import { Checkbox } from "./ui/checkbox";
 import { Input } from "./ui/input";
 import { Select, SelectContent, SelectTrigger, SelectValue } from "./ui/select";
 import { Textarea } from "./ui/textarea";
+
+// Register locales
+registerLocale("en-US", enUS);
+registerLocale("es", es);
 
 export enum FormFieldType {
   INPUT = "input",
@@ -43,6 +56,48 @@ interface CustomProps {
 }
 
 const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
+  const [locale, setLocale] = useState<string>("en-US");
+  const [dateFormat, setDateFormat] = useState<string>("MM/dd/yyyy");
+  const [defaultCountry, setDefaultCountry] = useState<CountryCode | undefined>(
+    "US"
+  );
+  const hasFetchedLocation = useRef(false); // Track if location has been fetched
+
+  useEffect(() => {
+    const fetchLocationData = async () => {
+      if (!hasFetchedLocation.current) {
+        try {
+          // Fetching location data from your internal API route
+          const response = await axios.get("/api/getLocation");
+          const countryCode = response.data.country;
+
+          if (countryCode === "US") {
+            setLocale("en-US");
+            setDateFormat("MM/dd/yyyy");
+            setDefaultCountry("US");
+          } else {
+            setLocale("es");
+            setDateFormat("dd/MM/yyyy");
+            setDefaultCountry(countryCode);
+          }
+
+          // Set default locale globally
+          setDefaultLocale(locale);
+          hasFetchedLocation.current = true; // Mark as fetched
+        } catch (error) {
+          console.error("Error fetching location data:", error);
+          // Fallback to defaults if there's an error
+          setLocale("es"); // Non-US fallback
+          setDateFormat("dd/MM/yyyy");
+          setDefaultCountry("US");
+          setDefaultLocale("en-US");
+        }
+      }
+    };
+
+    fetchLocationData();
+  });
+
   switch (props.fieldType) {
     case FormFieldType.INPUT:
       return (
@@ -80,7 +135,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
       return (
         <FormControl>
           <PhoneInput
-            defaultCountry="US"
+            defaultCountry={defaultCountry} // Now dynamically set based on location
             placeholder={props.placeholder}
             international
             withCountryCallingCode
@@ -112,17 +167,20 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
             src="/assets/icons/calendar.svg"
             height={24}
             width={24}
-            alt="user"
+            alt="calendar"
             className="ml-2"
           />
           <FormControl>
             <ReactDatePicker
               showTimeSelect={props.showTimeSelect ?? false}
               selected={field.value}
-              onChange={(date: Date) => field.onChange(date)}
+              onChange={(date: Date | null, event?: React.SyntheticEvent) =>
+                field.onChange(date)
+              }
               timeInputLabel="Time:"
-              dateFormat={props.dateFormat ?? "MM/dd/yyyy"}
+              dateFormat={dateFormat}
               wrapperClassName="date-picker"
+              locale={locale}
             />
           </FormControl>
         </div>
