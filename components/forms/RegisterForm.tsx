@@ -207,7 +207,7 @@ const RegisterForm = ({ user }: { user: User }) => {
               control={form.control}
               name="emergencyContactName"
               label="Emergency contact name"
-              placeholder="Guardian's name"
+              placeholder="Emergency contact name"
             />
 
             <CustomFormField
@@ -256,7 +256,7 @@ const RegisterForm = ({ user }: { user: User }) => {
               control={form.control}
               name="insuranceProvider"
               label="Insurance provider"
-              placeholder="BlueCross BlueShield"
+              placeholder="Insurance provider"
             />
 
             <CustomFormField
@@ -294,7 +294,7 @@ const RegisterForm = ({ user }: { user: User }) => {
               control={form.control}
               name="familyMedicalHistory"
               label=" Family medical history (if relevant)"
-              placeholder="Mother had brain cancer, Father has hypertension"
+              placeholder="Write your family history here"
             />
 
             <CustomFormField
