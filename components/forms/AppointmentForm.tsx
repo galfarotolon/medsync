@@ -9,10 +9,7 @@ import { z } from "zod";
 
 import { SelectItem } from "@/components/ui/select";
 import { Doctors } from "@/constants";
-import {
-  createAppointment,
-  updateAppointment,
-} from "@/lib/actions/appointment.actions";
+import { createAppointment } from "@/lib/actions/appointment.actions";
 import { getAppointmentSchema } from "@/lib/valitadion";
 import { Appointment } from "@/types/appwrite.types";
 
@@ -69,19 +66,17 @@ export const AppointmentForm = ({
       default:
         status = "pending";
     }
-
     try {
-      if (type === "create" && patientId) {
+      if (type === "create" && userId) {
         const appointment = {
           userId,
-          patient: patientId,
+          patient: userId,
           primaryPhysician: values.primaryPhysician,
           schedule: new Date(values.schedule),
           reason: values.reason!,
           status: status as Status,
           note: values.note,
         };
-
         const newAppointment = await createAppointment(appointment);
 
         if (newAppointment) {
@@ -103,12 +98,12 @@ export const AppointmentForm = ({
           type,
         };
 
-        const updatedAppointment = await updateAppointment(appointmentToUpdate);
+        // const updatedAppointment = await updateAppointment(appointmentToUpdate);
 
-        if (updatedAppointment) {
-          setOpen && setOpen(false);
-          form.reset();
-        }
+        // if (updatedAppointment) {
+        //   setOpen && setOpen(false);
+        //   form.reset();
+        // }
       }
     } catch (error) {
       console.log(error);
@@ -171,7 +166,6 @@ export const AppointmentForm = ({
               name="schedule"
               label="Expected appointment date"
               showTimeSelect
-              dateFormat="MM/dd/yyyy  -  h:mm aa"
             />
 
             <div
@@ -184,7 +178,7 @@ export const AppointmentForm = ({
                 control={form.control}
                 name="reason"
                 label="Appointment reason"
-                placeholder="Annual montly check-up"
+                placeholder="Enter appointment reason"
                 disabled={type === "schedule"}
               />
 

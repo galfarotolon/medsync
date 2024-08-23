@@ -161,6 +161,11 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
         </FormControl>
       );
     case FormFieldType.DATE_PICKER:
+      const datePickerFormat = props.showTimeSelect
+        ? locale === "en-US"
+          ? "MM/dd/yyyy - h:mm aa"
+          : "dd/MM/yyyy - h:mm aa"
+        : dateFormat;
       return (
         <div className="flex rounded-md border border-dark-500 bg-dark-400">
           <Image
@@ -178,7 +183,7 @@ const RenderInput = ({ field, props }: { field: any; props: CustomProps }) => {
                 field.onChange(date)
               }
               timeInputLabel="Time:"
-              dateFormat={dateFormat}
+              dateFormat={datePickerFormat}
               wrapperClassName="date-picker"
               locale={locale}
             />
