@@ -66,17 +66,19 @@ export const AppointmentForm = ({
       default:
         status = "pending";
     }
+    console.log(patientId);
     try {
       if (type === "create" && userId) {
         const appointment = {
           userId,
-          patient: userId,
+          patient: patientId,
           primaryPhysician: values.primaryPhysician,
           schedule: new Date(values.schedule),
           reason: values.reason!,
           status: status as Status,
           note: values.note,
         };
+
         const newAppointment = await createAppointment(appointment);
 
         if (newAppointment) {
@@ -166,6 +168,7 @@ export const AppointmentForm = ({
               name="schedule"
               label="Expected appointment date"
               showTimeSelect
+              dateFormat="MM/dd/yyyy  -  h:mm aa"
             />
 
             <div
@@ -178,7 +181,7 @@ export const AppointmentForm = ({
                 control={form.control}
                 name="reason"
                 label="Appointment reason"
-                placeholder="Enter appointment reason"
+                placeholder="Annual montly check-up"
                 disabled={type === "schedule"}
               />
 
