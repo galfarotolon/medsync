@@ -66,7 +66,7 @@ export const AppointmentForm = ({
       default:
         status = "pending";
     }
-    console.log(patientId);
+
     try {
       if (type === "create" && patientId) {
         const appointment = {
