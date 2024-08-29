@@ -68,7 +68,7 @@ export const AppointmentForm = ({
     }
     console.log(patientId);
     try {
-      if (type === "create" && userId) {
+      if (type === "create" && patientId) {
         const appointment = {
           userId,
           patient: patientId,

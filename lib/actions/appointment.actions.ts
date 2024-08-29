@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { ID, Query } from "node-appwrite";
 
 import { Appointment } from "@/types/appwrite.types";
+import { getPatient } from "@/lib/actions/patient.actions";  // Import the getPatient function
 
 import {
   APPOINTMENT_COLLECTION_ID,
@@ -15,14 +16,26 @@ import { formatDateTime, parseStringify } from "../utils";
 
 //  CREATE APPOINTMENT
 export const createAppointment = async (
-  appointment: CreateAppointmentParams
+  appointmentData: CreateAppointmentParams
 ) => {
   try {
+    // Step 1: Find the patient using the userId
+    const patient = await getPatient(appointmentData.userId);
+
+    if (!patient) {
+      console.error("No patient found with the provided userId.");
+      return null;  // Early exit if the patient is not found
+    }
+
+    // Step 2: Proceed with creating the appointment, linking it to the found patient
     const newAppointment = await databases.createDocument(
       DATABASE_ID!,
       APPOINTMENT_COLLECTION_ID!,
       ID.unique(),
-      appointment
+      {
+        ...appointmentData,
+        patient: patient.$id  // Link to the patient's ID
+      }
     );
 
     revalidatePath("/admin");
@@ -30,7 +43,7 @@ export const createAppointment = async (
   } catch (error) {
     console.error("An error occurred while creating a new appointment:", error);
   }
-};
+}
 
 //  GET RECENT APPOINTMENTS
 export const getRecentAppointmentList = async () => {

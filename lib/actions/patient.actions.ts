@@ -31,11 +31,11 @@ export const createUser = async (user: CreateUserParams) => {
   } catch (error: any) {
     // Check existing user
     if (error && error?.code === 409) {
-      const existingUser = await users.list([
+      const documents = await users.list([
         Query.equal("email", [user.email]),
       ]);
 
-      return existingUser.users[0];
+      return documents.users[0];
     }
     console.error("An error occurred while creating a new user:", error);
   }
@@ -97,22 +97,11 @@ export const registerPatient = async ({
 // GET PATIENT
 export const getPatient = async (userId: string) => {
   try {
-    console.log("Querying database for userId:", userId);
-
     const patients = await databases.listDocuments(
       DATABASE_ID!,
       PATIENT_COLLECTION_ID!,
-      [Query.equal("userId", userId)]  // Using string instead of an array
+      [Query.equal("userId", [userId])]
     );
-
-    console.log("Database query result:", patients);
-
-    if (patients.documents.length === 0) {
-      console.warn(`No patient found with userId: ${userId}`);
-      return null;
-    }
-
-    console.log("Patient document found:", patients.documents[0]);
 
     return parseStringify(patients.documents[0]);
   } catch (error) {
@@ -120,6 +109,5 @@ export const getPatient = async (userId: string) => {
       "An error occurred while retrieving the patient details:",
       error
     );
-    return null; // Ensure the function returns null on error
   }
 };
